@@ -1,0 +1,32 @@
+{
+  "name": "portal-server",
+  "version": "1.0.0",
+  "description": "server for portall new design app",
+  "main": "server.js",
+  "scripts": {
+    "test": "test",
+    "start": "node server.js",
+    "server": "nodemon server.js"
+  },
+  "author": "Roman Kozak",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.1546.0",
+    "bcrypt": "^5.1.0",
+    "colors": "^1.4.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "8.5.1",
+    "moment": "^2.29.4",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.0.1",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.1",
+    "sequelize": "^6.28.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
