@@ -1,13 +1,14 @@
 # ==== CONFIGURE =====
 # Use a Node base image
-FROM node:alpine 
+FROM node:alpine
 # Set the working directory to /portal-client inside the container
 WORKDIR /portal-server
 # Copy app files
-COPY . .
+COPY package*.json ./
 # ==== BUILD =====
 # Install dependencies (npm ci makes sure the exact versions in the lockfile gets installed)
-RUN npm install
+RUN npm cache clean --force && rm -rf node_modules && npm install
+COPY . .
 # ==== RUN =======
 # Set the env to "development"
 ENV NODE_ENV development

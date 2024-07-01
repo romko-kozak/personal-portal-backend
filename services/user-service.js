@@ -4,9 +4,15 @@ const {uploadToS3, generatePresignedUrl} = require('./../helpers');
 const {s3} = require('../config/aws');
 
 class UserService {
-  async getUsers() {
+  async getUsers(companyName) {
     try {
-      const users = await User.findAll();
+      let users;
+      
+      if (companyName) {
+        users = await User.findAll({where: {applicationId: companyName}});
+      } else {
+        users = await User.findAll();
+      }
 
       return users.map(user => {
         const {applicationId, avatar, email, firstName, lastName, id, socialMedia = {facebook: user.facebook, instagram: user.instagram, linkedIn: user.linkedIn}} = user;
@@ -122,16 +128,17 @@ class UserService {
             return;
           }
 
-          // Extract the object key from s3Upload.Location
-          const objectKey = record.avatar.substring(record.avatar.indexOf("avatars/"));
-          const avatarKey = objectKey.substring(0, objectKey.indexOf('%'));
-          const clearAvatarKey = avatarKey.includes('?') ? avatarKey.substring(0, avatarKey.indexOf('?')) : avatarKey;
-    
-          // Generate a new pre-signed URL
-          const url = await generatePresignedUrl(clearAvatarKey);
-    
-          // Update the record in your database with the new pre-signed URL
-          User.update({avatar: url}, {where: {id: record.id}});
+          const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
+          const match = record.avatar.match(uuidRegex);
+
+          if (match) {
+            // Generate a new pre-signed URL
+            const url = await generatePresignedUrl(`avatars/${match[0]}.png`);
+            // Update the record in your database with the new pre-signed URL
+            User.update({avatar: url}, {where: {id: record.id}});
+          } else {
+            console.log('WARNING: No UUID found in the URL');
+          }
         } catch (err) {
           console.error('Error generating URL for object', record.avatar, err);
         }

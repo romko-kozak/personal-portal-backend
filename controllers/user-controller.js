@@ -15,13 +15,26 @@ class UserController {
         return res.status(401).json({ status: 401, message: 'Token expired!', data: null });
       }
 
-      const userHasPermission = await checkUserPermission('SHOW_ALL_USERS', token);
+      const userHasPermissionToSeeAllUsers = await checkUserPermission('SHOW_ALL_USERS', token);
+      const userHasPermissionToSeeCompanyUsers = await checkUserPermission('SHOW_COMPANY_USERS', token);
 
-      if (!userHasPermission) {
+      if (!userHasPermissionToSeeAllUsers && !userHasPermissionToSeeCompanyUsers) {
         return next(PortalError.Forbidden('Users is not allowed to see all users!'));
       }
 
-      const users = await UserService.getUsers();
+      let users;
+
+      if (userHasPermissionToSeeAllUsers) {
+        users = await UserService.getUsers();
+      } else {
+        const companyName = req.query.company;
+
+        if (!companyName) {
+          return next(PortalError.BadRequest('"companyName" query parameter is missing!'));
+        }
+
+        users = await UserService.getUsers(companyName);
+      }
 
       res.status(200).json({ status: 200, message: 'Users were fetched successfully!', data: users });
     } catch (err) {
